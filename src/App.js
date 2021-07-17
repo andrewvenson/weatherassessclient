@@ -6,6 +6,7 @@ function App() {
   // states
   const [defaultweather, setDefaultWeather] = useState({});
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [geo, setGeo] = useState({
       type: "coords",
       city: "",
@@ -22,17 +23,26 @@ function App() {
       lon: ""
   }
 
-  // on mount
-  useEffect(() => {
-    axios.get("https://weathernums.herokuapp.com/").then(response => {
-        console.log(response.data);
-        setDefaultWeather(response.data);
-        setGeo(initialState);
-    }).catch(err => {
+  // handle client front end error
+  const handleSetError = () => {
         setGeo(initialState);
         setError(true);
         setTimeout(() => setError(false), 5000);
-        console.log(err);
+  }
+
+  // on mount
+  useEffect(() => {
+    setLoading(true);
+    axios.get("https://weathernums.herokuapp.com/").then(response => {
+        if(response.data === "error"){
+            handleSetError();
+        }else{
+            setDefaultWeather(response.data);
+        }
+        setLoading(false);
+    }).catch(err => {
+        handleSetError();
+        setLoading(false);
     });
   }, []);
 
@@ -42,17 +52,21 @@ function App() {
   }
 
   const getWeatherData = () => {
+    setLoading(true);
     axios.get(`https://weathernums.herokuapp.com/location?type=${geo.type}&val=${setQueryParam()}`).then(response => {
-        console.log(response.data);
-        setDefaultWeather(response.data);
+        if(response.data === "error"){
+            handleSetError();
+        }else{
+            setDefaultWeather(response.data);
+        }
+        setLoading(false);
     }).catch(err => {
-        setGeo(initialState);
-        setError(true);
-        setTimeout(() => setError(false), 5000);
-        console.log(err)
+        handleSetError();
+        setLoading(false);
     });
   }
 
+  // handle input changes
   const handleGeoChange = (e, type) => {
       (geo.type === "coords" && type === "lat") && setGeo({...geo, lat: e.target.value});
       (geo.type === "coords" && type === "lon") && setGeo({...geo, lon: e.target.value});
@@ -124,13 +138,17 @@ function App() {
           <div style={centerLocationInfo}>
               <h4 style={{margin: "0px", color: "green"}}>Next 3 day Temps °F</h4>
               <br/>
-
-              {/*Coords*/}
-              <span style={locationStyle}>{!Object.keys(defaultweather).includes("coord") ? `30.2240897, -92.01984270000003` : defaultweather.coord} </span>
-              {/*City*/}
-              <span style={locationStyle}>{!Object.keys(defaultweather).includes("city") ? `Lafayette` : defaultweather.city} </span>
-              {/*Country*/}
-              <span style={locationStyle}>{!Object.keys(defaultweather).includes("country") ? `US` : defaultweather.country} </span>
+              {
+                  loading ? <p style={{color: "green"}}>...</p> :
+                  <>
+                      {/*Coords*/}
+                      <span style={locationStyle}>{!Object.keys(defaultweather).includes("coord") ? `30.2240897, -92.01984270000003` : defaultweather.coord} </span>
+                      {/*City*/}
+                      <span style={locationStyle}>{!Object.keys(defaultweather).includes("city") ? `Lafayette` : defaultweather.city} </span>
+                      {/*Country*/}
+                      <span style={locationStyle}>{!Object.keys(defaultweather).includes("country") ? `US` : defaultweather.country} </span>
+                  </>
+              }
           </div>
           <br/>
           {
