@@ -1,5 +1,6 @@
 import {useState, useEffect} from "react";
 import axios from "axios";
+import Globe from "./images/globe.png";
 import './App.css';
 
 function App() {
@@ -141,12 +142,17 @@ function App() {
               {
                   loading ? <p style={{color: "green"}}>...</p> :
                   <>
-                      {/*Coords*/}
-                      <span style={locationStyle}>{!Object.keys(defaultweather).includes("coord") ? `30.2240897, -92.01984270000003` : defaultweather.coord} </span>
-                      {/*City*/}
-                      <span style={locationStyle}>{!Object.keys(defaultweather).includes("city") ? `Lafayette` : defaultweather.city} </span>
-                      {/*Country*/}
-                      <span style={locationStyle}>{!Object.keys(defaultweather).includes("country") ? `US` : defaultweather.country} </span>
+                      {/* 0,0 coordinates show globe, zip=globe shows globe image, city=globe shows globe */}
+                      {defaultweather.city === "Globe" ? <img width="100px" height="100px" src={Globe} /> :
+                          <>
+                              {/*Coords*/}
+                              <span style={locationStyle}>{!Object.keys(defaultweather).includes("coord") ? `30.2240897, -92.01984270000003` : defaultweather.coord} </span>
+                              {/*City*/}
+                              <span style={locationStyle}>{!Object.keys(defaultweather).includes("city") ? `Lafayette` : defaultweather.city} </span>
+                              {/*Country*/}
+                              <span style={locationStyle}>{!Object.keys(defaultweather).includes("country") ? `US` : defaultweather.country} </span>
+                          </>
+                      }
                   </>
               }
           </div>
